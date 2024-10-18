@@ -5,8 +5,8 @@
 }
 
 .artist-link, .wave-text-description-demi {
-    letter-spacing: 1.02em;
-    font-weight: 900;
+    letter-spacing: 0.02em;
+    font-weight: 600;
 }
 
 .quality-tag-container {
