@@ -1,0 +1,32 @@
+/*{"name":"Tweaks","author":"ameiw","description":"Adds a few theming tweaks, including slight borders around text and blurring album backdrops."}*/
+
+:root {
+    text-shadow: 0px 0px 5px rgb(var(--cover-DarkMuted), 1);
+}
+
+.artist-link, .wave-text-description-demi {
+    letter-spacing: 1.02em;
+    font-weight: 900;
+}
+
+.quality-tag-container {
+	height: 36px !important;
+    width: full;
+    min-width: max-content;
+    margin-left: 0.25rem;
+}
+
+.quality-tag {
+    background-color: rgb(var(--cover-DarkMuted), 0.5) !important;
+    border: 1px solid #222c;
+    box-shadow: 0px 0px 2px rgb(var(--cover-DarkVibrant), 0.5);
+    color: rgb(var(--cover-LightVibrant), 1) !important;
+    margin: 6px;
+    opacity: .8;
+}
+
+
+div.header-background > div > div > div > div.tidal-ui__z-stack {
+    filter: blur(1.5rem);
+    scale: 120%
+}

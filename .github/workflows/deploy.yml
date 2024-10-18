@@ -1,52 +1,51 @@
 name: Build and deploy
 
-on:
- push:
-  branches: [master]
-  paths:
-   - "plugins/**"
- workflow_dispatch:
+on: [push]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
- deploy:
-  runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-  permissions:
-   contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm 📥
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-  steps:
-   - uses: actions/checkout@v2
+      - name: Install Node.js 📥
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
 
-   - name: Prepare environment
-     uses: actions/setup-node@v3
-     with:
-      node-version: "16"
+      - name: Install dependencies 📥
+        run: pnpm install
 
-   - name: Install dependencies
-     run: |
-      npm i
-      for plugin in plugins/*
-      do
-        cd $plugin
-        npm install
-        cd ../..
-      done
+      - name: Build plugins 🛠️
+        run: pnpm run build
 
-   - name: Build plugin(s)
-     run: |
-      mkdir -p .dist
-      npm run build
-      for plugin in plugins/*
-      do
-        if [ -d "$plugin/dist" ]; then
-          cp -r "$plugin/dist" ".dist/$(basename $plugin)"
-        else
-          echo "Directory $plugin/dist does not exist skipping..."
-        fi
-      done
+      - name: Upload artifact 📡
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
-   - name: Deploy to GitHub Pages
-     uses: peaceiris/actions-gh-pages@v3
-     with:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
-      publish_dir: .dist
+  deploy:
+    if: github.ref == 'refs/heads/master'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Publish to GitHub Pages 🚀
+        id: deployment
+        uses: actions/deploy-pages@v4
