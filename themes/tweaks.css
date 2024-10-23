@@ -1,4 +1,4 @@
-/*{"name":"Tweaks","author":"ameiw","description":"Adds a few theming tweaks, including slight borders around text and blurring album backdrops."}*/
+/*{"name":"TidalTweaks","author":"ameiw","description":"Adds a few theming tweaks, including slight borders around text and blurring album backdrops."}*/
 
 :root {
     text-shadow: 0px 0px 5px rgb(var(--cover-DarkMuted), 1);
@@ -26,7 +26,7 @@
 }
 
 
-div.header-background > div > div > div > div.tidal-ui__z-stack {
+.ALBUM_HEADER > div > div > div::before {
     filter: blur(1.5rem);
     scale: 120%
 }
