@@ -25,47 +25,28 @@
     opacity: .8;
 }
 
-
-.ALBUM_HEADER > div > div > div::before {
+.ALBUM_HEADER>div>div>div::before {
     filter: blur(1.5rem);
+    background-image: linear-gradient(168deg,rgba(var(--cover-LightVibrant),1) 40%,rgba(var(--cover-Vibrant),4) 100%),var(--img);
     scale: 120%
 }
 
-div > [class^="smallHeader"]::before {
-    /* not sure which blend mode is the best here, feel free to try other ones */
-    background-blend-mode: difference;
-    background-image: linear-gradient(168deg, rgba(var(--cover-LightVibrant), 1) 40%, rgba(var(--cover-Vibrant), .1) 100%), var(--img);
-    background-color: rgba(var(--color-DarkVibrant), .1);
-    backdrop-filter: blur(30px);
-    filter: blur(50px);
-}
-
-div > [class^="smallHeader"] {
-    /* this bg-image is to stop top white flashes caused by scrolling text */
-    background-image: linear-gradient(180deg, rgba(var(--cover-DarkVibrant), 1) 0%, rgba(0,0,0,.0) 10%);
+div>[class^=smallHeader] {
+    background-image: linear-gradient(180deg,rgba(var(--cover-DarkVibrant),1) 0,rgba(0,0,0,0) 10%);
     background-color: transparent;
     background-size: cover
 }
 
-div > [class^="smallHeader"]::before {
-    /* not sure which blend mode is the best here, feel free to try other ones */
+div>[class^=smallHeader]::before {
     background-blend-mode: difference;
-    background-image: linear-gradient(168deg, rgba(var(--cover-LightVibrant), 1) 40%, rgba(var(--cover-Vibrant), .1) 100%), var(--img);
-    background-color: rgba(var(--color-DarkVibrant), .1);
+    background-image: linear-gradient(168deg,rgba(var(--cover-LightVibrant),.3) 40%,rgba(var(--cover-DarkVibrant),.1) 100%),var(--img);
+    background-color: rgba(var(--color-DarkVibrant),0);
     backdrop-filter: blur(30px);
-    filter: blur(50px);
+    filter: blur(50px)
 }
 
-div > [class^="smallHeader"] {
-    /* this bg-image is to stop top white flashes caused by scrolling text */
-    background-image: linear-gradient(180deg, rgba(var(--cover-DarkVibrant), 1) 0%, rgba(0,0,0,.0) 10%);
-    background-color: transparent;
-    background-size: cover
-}
-
-/* On shortcut item containers on the home page */
 @container (width > 200px) {
-    a > [class^="shortcutItem"]::after {
-            backdrop-filter: blur(10px);
+    a>[class^=shortcutItem]::after {
+        backdrop-filter: blur(10px);
     }
 }
