@@ -55,6 +55,8 @@ div>[class^=smallHeader]::before {
     line-clamp: 2;
     -webkit-line-clamp: 2;
     text-align: right !important;
-    color: color-mix(in oklab, rgb(var(--cover-LightMuted)), rgb(180,180,180) 70%);
+    color: color-mix(in oklab, rgb(var(--cover-LightMuted, 180,180,180)), rgb(180,180,180) 90%);
     max-width:128px !important;
+    width: min-content;
+    min-width:85px;
 }
