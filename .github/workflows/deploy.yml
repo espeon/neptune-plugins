@@ -13,17 +13,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm 📥
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install Node.js 📥
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
 
       - name: Install dependencies 📥
-        run: npm install
+        # interim patch? take out asap!
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build plugins 🛠️
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload artifact 📡
         uses: actions/upload-pages-artifact@v3

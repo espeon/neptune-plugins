@@ -1,0 +1,9 @@
+{
+  "displayName": "EddyAPI",
+  "description": "Adds a read-only now playing API.",
+  "author": "espeon",
+  "main": "./src/index.js",
+  "dependencies": {
+    "@inrixia/lib": "workspace:*"
+  }
+}

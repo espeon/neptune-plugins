@@ -20,7 +20,7 @@ const fileUrl: esbuild.Plugin = {
         uri: args.path,
         path: path.join(
           args.resolveDir,
-          args.path.slice("file://".length).split("?")[0]
+          args.path.slice("file://".length).split("?")[0],
         ),
       },
       namespace: "file-url",
@@ -62,7 +62,7 @@ const fileUrl: esbuild.Plugin = {
         return {
           contents: `export default ${JSON.stringify(content)}`,
         };
-      }
+      },
     );
   },
 };
@@ -95,7 +95,7 @@ const neptuneNativeImports: esbuild.Plugin = {
         metafile: true,
         bundle: true,
         // This breaks native calls via neptune api but we dont use those
-        minify,
+        minify: false,
         treeShaking: true,
         format: "esm",
         external: nativeExternals,
@@ -104,8 +104,10 @@ const neptuneNativeImports: esbuild.Plugin = {
 
       const output = Object.values(metafile.outputs)[0];
 
-      const registerExports = `__${output.entryPoint}_registerExports`;
-      const invokeExport = `__${output.entryPoint}`;
+      const entryPoint = output.entryPoint?.replace("plugins/", "");
+
+      const registerExports = `__${entryPoint}_registerExports`;
+      const invokeExport = `__${entryPoint}`;
 
       return {
         contents: `
@@ -122,14 +124,12 @@ const neptuneNativeImports: esbuild.Plugin = {
 					NeptuneNative.deleteEvalScope(scopeId);
 
 					// Register the native code
-					await window.electron.ipcRenderer.invoke("${registerExports}", ${JSON.stringify(
-          outputCode
-        )}, "${globalName}");
-				
+					await window.electron.ipcRenderer.invoke("${registerExports}", ${JSON.stringify(outputCode)}, "${globalName}");
+
 					// Helper function for invoking exports
 					const invokeNative = (exportName) => (...args) => window.electron.ipcRenderer.invoke("${invokeExport}", exportName, ...args).catch((err) => {
-						err.stack = err.stack?.replaceAll("Error invoking remote method '${invokeExport}': Error: ", "");
-						throw err;
+						const msg = err.stack?.replaceAll("Error invoking remote method '${invokeExport}': Error: ", "");
+						throw new Error(\`[${entryPoint}.\${exportName}] \${msg}\`);
 					});
 
 					// Expose built exports via ipc
@@ -144,66 +144,62 @@ const neptuneNativeImports: esbuild.Plugin = {
   },
 };
 
-// if we have plugins
-if (fs.existsSync("./plugins")) {
-  const plugins = fs.readdirSync("./plugins");
-  for (const plugin of plugins) {
-    if (plugin.startsWith("_")) continue;
-    const pluginPath = path.join("./plugins/", plugin);
-    const pluginPackage = JSON.parse(
-      fs.readFileSync(path.join(pluginPath, "package.json"), "utf8")
-    );
-    const outfile = path.join("./dist", plugin, "index.js");
+const plugins = fs.readdirSync("./plugins");
+for (const plugin of plugins) {
+  if (plugin.startsWith("_")) continue;
+  const pluginPath = path.join("./plugins/", plugin);
+  const pluginPackage = JSON.parse(
+    fs.readFileSync(path.join(pluginPath, "package.json"), "utf8"),
+  );
+  const outfile = path.join("./dist", plugin, "index.js");
 
-    esbuild
-      .build({
-        entryPoints: [
-          "./" + path.join(pluginPath, pluginPackage.main ?? "index.js"),
-        ],
-        plugins: [fileUrl, neptuneNativeImports],
-        bundle: true,
-        minify,
-        format: "esm",
-        external: ["@neptune", "@plugin"],
-        platform: "browser",
-        outfile,
-        logOverride: {
-          "import-is-undefined": "silent",
-        },
-      })
-      .then(() => {
-        fs.createReadStream(outfile)
-          // It being md5 does not matter, this is for caching and not security
-          .pipe(crypto.createHash("md5").setEncoding("hex"))
-          .on("finish", function (this: crypto.Hash) {
-            fs.writeFileSync(
-              path.join("./dist", plugin, "manifest.json"),
-              JSON.stringify({
-                name: pluginPackage.displayName,
-                description: pluginPackage.description,
-                author: pluginPackage.author,
-                hash: this.read(),
-              })
-            );
+  esbuild
+    .build({
+      entryPoints: [
+        "./" + path.join(pluginPath, pluginPackage.main ?? "index.js"),
+      ],
+      plugins: [fileUrl, neptuneNativeImports],
+      bundle: true,
+      minify,
+      format: "esm",
+      external: ["@neptune", "@plugin"],
+      platform: "browser",
+      outfile,
+      logOverride: {
+        "import-is-undefined": "silent",
+      },
+    })
+    .then(() => {
+      fs.createReadStream(outfile)
+        // It being md5 does not matter, this is for caching and not security
+        .pipe(crypto.createHash("md5").setEncoding("hex"))
+        .on("finish", function (this: crypto.Hash) {
+          fs.writeFileSync(
+            path.join("./dist", plugin, "manifest.json"),
+            JSON.stringify({
+              name: pluginPackage.displayName,
+              description: pluginPackage.description,
+              author: pluginPackage.author,
+              hash: this.read(),
+            }),
+          );
 
-            console.log("Built " + pluginPackage.displayName + "!");
-          });
-      });
-  }
+          console.log("Built " + pluginPackage.displayName + "!");
+        });
+    });
 }
-if (fs.existsSync("./themes")) {
-  fs.mkdirSync("./dist/themes", { recursive: true });
-  const themes = fs.readdirSync("./themes");
-  for (const theme of themes) {
-    const file = fs.readFileSync(path.join("./themes", theme), "utf8");
-    const css = new CleanCSS().minify(file).styles;
 
-    // Minify manifest JSON
-    const json = file.slice(file.indexOf("/*") + 2, file.indexOf("*/"));
-    const manifest = JSON.parse(json);
-    const comment = `/*${JSON.stringify(manifest)}*/`;
+fs.mkdirSync("./dist/themes", { recursive: true });
+const themes = fs.readdirSync("./themes");
+for (const theme of themes) {
+  const file = fs.readFileSync(path.join("./themes", theme), "utf8");
+  const css = new CleanCSS().minify(file).styles;
 
-    fs.writeFileSync(path.join("./dist/themes", theme), comment + css);
-    console.log("Built " + manifest.name + "!");
-  }
+  // Minify manifest JSON
+  const json = file.slice(file.indexOf("/*") + 2, file.indexOf("*/"));
+  const manifest = JSON.parse(json);
+  const comment = `/*${JSON.stringify(manifest)}*/`;
+
+  fs.writeFileSync(path.join("./dist/themes", theme), comment + css);
+  console.log("Built " + manifest.name + "!");
 }
