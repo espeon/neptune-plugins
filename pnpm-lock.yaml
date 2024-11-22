@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      adm-zip:
-        specifier: ^0.5.16
-        version: 0.5.16
     devDependencies:
       '@types/adm-zip':
         specifier: ^0.5.6
@@ -55,6 +51,18 @@ importers:
         specifier: ^5.5.4
         version: 5.7.2
 
+  plugins/EddyAPI:
+    dependencies:
+      '@inrixia/lib':
+        specifier: workspace:*
+        version: link:../_lib
+
+  plugins/ListenBrainz:
+    dependencies:
+      '@inrixia/lib':
+        specifier: workspace:*
+        version: link:../_lib
+
   plugins/_lib:
     dependencies:
       '@inrixia/helpers':
@@ -76,12 +84,6 @@ importers:
       musicbrainz-api:
         specifier: ^0.19.1
         version: 0.19.1
-
-  plugins/eddyAPI:
-    dependencies:
-      '@inrixia/lib':
-        specifier: workspace:*
-        version: link:../_lib
 
 packages:
 
@@ -370,10 +372,6 @@ packages:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-
-  adm-zip@0.5.16:
-    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
-    engines: {node: '>=12.0'}
 
   ajv@8.12.0:
     resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
@@ -1532,8 +1530,6 @@ snapshots:
       negotiator: 0.6.3
 
   acorn@8.14.0: {}
-
-  adm-zip@0.5.16: {}
 
   ajv@8.12.0:
     dependencies:

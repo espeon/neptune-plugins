@@ -14,5 +14,5 @@ if __name__ == '__main__':
         port = 8000
     server_address = ('', port)
     httpd = HTTPServer(server_address, CORSRequestHandler)
-    print(f'EddyAPI plugin host is running on port {port}')
+    print(f'Plugin host is running on port {port}')
     httpd.serve_forever()

@@ -2,12 +2,12 @@ import { html } from "@neptune/voby";
 import { getSettings } from "@inrixia/lib/storage";
 import { SwitchSetting } from "@inrixia/lib/components/SwitchSetting";
 import { TextInput } from "@inrixia/lib/components/TextInput";
-import { update } from ".";
+import { update } from "./index";
 
 export const settings = getSettings({
   eddySecureAPI: false,
   eddySecureAPIKey: "super-secret-eddy-key",
-  eddyAPIPort: 3000,
+  eddyAPIPort: 3665,
 });
 
 export const Settings = () =>
@@ -17,28 +17,21 @@ export const Settings = () =>
         settings.eddySecureAPI = !settings.eddySecureAPI;
         update();
       }}
-      title="Secure your API with a key"
+      title="Key-based authentication"
     />
     <${TextInput}
-      value=${settings.eddySecureAPIKey}
-      onChange=${(e: { target: { value: string } }) => {
-        settings.eddySecureAPIKey = e.target.value;
-        update();
-      }}
+      text=${settings.eddySecureAPIKey}
+      onChange=${(text: string) => (settings.eddySecureAPIKey = text)}
       placeholder="super-secret-eddy-key"
-      title="Enter your API key"
+      title="Key"
     />
     <${TextInput}
-      value=${settings.eddyAPIPort}
-      onChange=${(e: { target: { value: string } }) => {
-        settings.eddyAPIPort = parseInt(e.target.value);
-        update();
-      }}
-      placeholder="3000"
-      title="Enter your API port"
+      text=${settings.eddyAPIPort}
+      onChange=${(text: string) => (settings.eddyAPIPort = parseInt(text))}
+      placeholder="3665"
+      title="API port"
     />
-    <p>
-      <strong>Note:</strong> This plugin is still in development. Please report
-      any bugs or issues you encounter. Some settings updates may need a plugin
-      reload.
+    <p style="margin-top: 1rem; text-size: small;">
+      <strong>Note:</strong> This plugin is still in development. Some settings
+      updates may need a plugin reload.
     </p> `;

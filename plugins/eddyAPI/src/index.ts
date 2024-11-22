@@ -1,12 +1,16 @@
 import { intercept } from "@neptune";
 import { Tracer } from "@inrixia/lib/trace";
 
+import { settings } from "./Settings";
+
+export { Settings } from "./Settings";
+
 import { MediaItem, MediaItemCache } from "@inrixia/lib/Caches/MediaItemCache";
 import getPlaybackControl from "@inrixia/lib/getPlaybackControl";
 
-import { updateMediaInfo, stopServer } from "./serve.native";
+import { updateMediaInfo, stopServer, startServer } from "./serve.native";
 
-const trace = Tracer("[DiscordRPC]");
+const trace = Tracer("[EddyAPI]");
 
 interface MediaInfo {
   /// the current track
@@ -21,6 +25,7 @@ interface MediaInfo {
   artistArt: string | null;
   /// is the player paused
   paused: boolean;
+  lastUpdate: number;
 }
 
 interface UpdateInfo {
@@ -34,18 +39,24 @@ const getMediaURL = (id?: string, path = "/1280x1280.jpg") =>
     ? "https://resources.tidal.com/images/" + id.split("-").join("/") + path
     : null;
 
-let currentInfo: MediaInfo = {
-  item: null,
-  position: null,
-  duration: null,
-  albumArt: null,
-  artistArt: null,
-  paused: false,
-};
+let currentInfo: MediaInfo | null = null;
 
 export const update = async (info?: UpdateInfo) => {
-  trace.log("Updating media info:", info);
+  trace.debug("Updating media info:", info);
+
   if (!info) return;
+
+  if (!currentInfo)
+    currentInfo = {
+      item: null,
+      position: null,
+      duration: null,
+      albumArt: null,
+      artistArt: null,
+      paused: false,
+      lastUpdate: Date.now(),
+    };
+
   const { track, time, paused } = info;
   if (track) {
     currentInfo.item = track;
@@ -53,19 +64,20 @@ export const update = async (info?: UpdateInfo) => {
       track.album && track.album.cover ? getMediaURL(track.album.cover) : null;
     currentInfo.artistArt =
       track.artist && track.artist.picture
-        ? getMediaURL(track.artist.picture)
+        ? getMediaURL(track.artist.picture, "/320x320.jpg")
         : null;
     currentInfo.duration = track.duration ? track.duration : null;
   }
 
   if (time) {
     currentInfo.position = time;
+    currentInfo.lastUpdate = Date.now();
   }
 
-  if (paused) {
+  // oops! forgot that paused can be falsy :)
+  if (paused !== undefined) {
     currentInfo.paused = paused;
   }
-  trace.log("Current media info:", currentInfo);
   updateMediaInfo(currentInfo);
 };
 
@@ -90,7 +102,7 @@ const unloadSeek = intercept("playbackControls/SEEK", ([newTime]) => {
 const unloadPlay = intercept(
   "playbackControls/SET_PLAYBACK_STATE",
   ([state]) => {
-    if (currentInfo.paused && state === "PLAYING") update({ paused: false });
+    if (currentInfo?.paused && state === "PLAYING") update({ paused: false });
   },
 );
 const unloadPause = intercept("playbackControls/PAUSE", () => {
@@ -105,6 +117,25 @@ update({
   time: latestCurrentTime,
   paused: playbackState !== "PLAYING",
 });
+
+let server: any;
+
+export const onLoad = (s: typeof settings) => {
+  trace.log("Loading EddyAPI on port " + s.eddyAPIPort);
+  trace.log(
+    "Secure mode " +
+      (s.eddySecureAPI
+        ? "enabled - check your config for the API key."
+        : "disabled."),
+  );
+  server = startServer({
+    port: s.eddyAPIPort || 3665,
+    secure: s.eddySecureAPI || false,
+    apiKey: s.eddySecureAPIKey,
+  });
+};
+
+onLoad(settings);
 
 export const onUnload = () => {
   unloadTransition();
