@@ -1,4 +1,4 @@
-/*{"name":"Tweaks","author":"ameiw","description":"Adds a few theming tweaks, including slight borders around text and blurring album backdrops."}*/
+/*{"name":"TidalTweaks","author":"ameiw","description":"Adds a few theming tweaks, including slight borders around text and blurring album backdrops."}*/
 
 :root {
     text-shadow: 0px 0px 5px rgb(var(--cover-DarkMuted), 1);
@@ -25,8 +25,38 @@
     opacity: .8;
 }
 
-
-div.header-background > div > div > div > div.tidal-ui__z-stack {
+.ALBUM_HEADER>div>div>div::before {
     filter: blur(1.5rem);
+    background-image: linear-gradient(168deg,rgba(var(--cover-LightVibrant),1) 40%,rgba(var(--cover-Vibrant),4) 100%),var(--img);
     scale: 120%
+}
+
+div>[class^=smallHeader] {
+    background-image: linear-gradient(180deg,rgba(var(--cover-DarkVibrant),1) 0,rgba(0,0,0,0) 10%);
+    background-color: transparent;
+    background-size: cover
+}
+
+div>[class^=smallHeader]::before {
+    background-blend-mode: difference;
+    background-image: linear-gradient(168deg,rgba(var(--cover-LightVibrant),.3) 40%,rgba(var(--cover-DarkVibrant),.1) 100%),var(--img);
+    background-color: rgba(var(--color-DarkVibrant),0);
+    backdrop-filter: blur(30px);
+    filter: blur(50px)
+}
+
+@container (width > 200px) {
+    a>[class^=shortcutItem]::after {
+        backdrop-filter: blur(10px);
+    }
+}
+
+.bitInfo {
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    text-align: right !important;
+    color: color-mix(in oklab, rgb(var(--cover-LightMuted, 180,180,180)), rgb(180,180,180) 90%);
+    max-width:128px !important;
+    width: min-content;
+    min-width:85px;
 }
