@@ -57,12 +57,6 @@ importers:
         specifier: workspace:*
         version: link:../_lib
 
-  plugins/ListenBrainz:
-    dependencies:
-      '@inrixia/lib':
-        specifier: workspace:*
-        version: link:../_lib
-
   plugins/_lib:
     dependencies:
       '@inrixia/helpers':
