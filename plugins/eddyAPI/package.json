@@ -1,0 +1,10 @@
+{
+  "displayName": "EddyAPI",
+  "description": "Adds a now playing API.",
+  "author": "espeon",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "dependencies": {
+    "@inrixia/lib": "workspace:*"
+  }
+}

@@ -5,6 +5,8 @@ import crypto from "crypto";
 import { minify as minifyHtml } from "html-minifier-terser";
 import CleanCSS from "clean-css";
 
+import AdmZip from "adm-zip";
+
 const nativeExternals = ["@neptune", "@plugin", "electron"];
 const minify = true;
 
@@ -20,7 +22,7 @@ const fileUrl: esbuild.Plugin = {
         uri: args.path,
         path: path.join(
           args.resolveDir,
-          args.path.slice("file://".length).split("?")[0]
+          args.path.slice("file://".length).split("?")[0],
         ),
       },
       namespace: "file-url",
@@ -62,7 +64,7 @@ const fileUrl: esbuild.Plugin = {
         return {
           contents: `export default ${JSON.stringify(content)}`,
         };
-      }
+      },
     );
   },
 };
@@ -123,9 +125,9 @@ const neptuneNativeImports: esbuild.Plugin = {
 
 					// Register the native code
 					await window.electron.ipcRenderer.invoke("${registerExports}", ${JSON.stringify(
-          outputCode
-        )}, "${globalName}");
-				
+            outputCode,
+          )}, "${globalName}");
+
 					// Helper function for invoking exports
 					const invokeNative = (exportName) => (...args) => window.electron.ipcRenderer.invoke("${invokeExport}", exportName, ...args).catch((err) => {
 						err.stack = err.stack?.replaceAll("Error invoking remote method '${invokeExport}': Error: ", "");
@@ -151,7 +153,7 @@ if (fs.existsSync("./plugins")) {
     if (plugin.startsWith("_")) continue;
     const pluginPath = path.join("./plugins/", plugin);
     const pluginPackage = JSON.parse(
-      fs.readFileSync(path.join(pluginPath, "package.json"), "utf8")
+      fs.readFileSync(path.join(pluginPath, "package.json"), "utf8"),
     );
     const outfile = path.join("./dist", plugin, "index.js");
 
@@ -172,21 +174,36 @@ if (fs.existsSync("./plugins")) {
         },
       })
       .then(() => {
+        let manifest = null;
         fs.createReadStream(outfile)
           // It being md5 does not matter, this is for caching and not security
           .pipe(crypto.createHash("md5").setEncoding("hex"))
           .on("finish", function (this: crypto.Hash) {
-            fs.writeFileSync(
-              path.join("./dist", plugin, "manifest.json"),
-              JSON.stringify({
-                name: pluginPackage.displayName,
-                description: pluginPackage.description,
-                author: pluginPackage.author,
-                hash: this.read(),
-              })
-            );
+            (manifest = JSON.stringify({
+              name: pluginPackage.displayName,
+              description: pluginPackage.description,
+              author: pluginPackage.author,
+              hash: this.read(),
+            })),
+              fs.writeFileSync(
+                path.join("./dist", plugin, "manifest.json"),
+                JSON.stringify({
+                  name: pluginPackage.displayName,
+                  description: pluginPackage.description,
+                  author: pluginPackage.author,
+                  hash: this.read(),
+                }),
+              );
+
+            // prepend a commented-out manifest.json to the index.js
+            const index = fs.readFileSync(outfile, "utf8");
+            fs.writeFileSync(outfile, `/*\n${manifest}\n*/${index}`);
 
             console.log("Built " + pluginPackage.displayName + "!");
+            // Zip the plugin
+            const zip = new AdmZip();
+            zip.addLocalFile(outfile);
+            zip.writeZip(path.join("./dist", plugin + ".zip"));
           });
       });
   }
