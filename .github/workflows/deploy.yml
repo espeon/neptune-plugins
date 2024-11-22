@@ -20,10 +20,10 @@ jobs:
           node-version: 20
 
       - name: Install dependencies 📥
-        run: npm install
+        run: pnpm install
 
       - name: Build plugins 🛠️
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload artifact 📡
         uses: actions/upload-pages-artifact@v3
