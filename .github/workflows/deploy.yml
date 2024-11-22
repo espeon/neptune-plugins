@@ -25,7 +25,8 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies 📥
-        run: pnpm install
+        # interim patch? take out asap!
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build plugins 🛠️
         run: pnpm run build
