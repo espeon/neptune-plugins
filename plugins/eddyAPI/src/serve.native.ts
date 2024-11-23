@@ -51,7 +51,7 @@ const createAPIServer = (config: ServerConfig) => {
         const timeSinceLastUpdate = Math.floor(
           (info.currentTime - info.lastUpdate) / 1000,
         );
-        if (timeSinceLastUpdate > 0) {
+        if (timeSinceLastUpdate > 1 && !info.paused) {
           info.position = info.position + timeSinceLastUpdate;
         }
         res.end(JSON.stringify(currentMediaInfo));
