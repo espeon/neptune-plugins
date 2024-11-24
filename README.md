@@ -8,7 +8,7 @@ Each plugin in the `plugins/` directory will be automatically built by running `
 
 ## a small list of plugins and themes
 
-- EddyAPI: Adds a read-only now playing API. `https://espeon.github.io/neptune-plugins/EddyAPI`
+- EddyAPI: Adds a read-only now playing API. `https://espeon.github.io/neptune-plugins/eddyAPI`
   - Serves a JSON object with various info about the current track at /now-playing.
   - The "position" field is updated both on tidal-reported time and the difference between marked last update time and now.
 
