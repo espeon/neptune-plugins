@@ -42,14 +42,14 @@ const getMediaURL = (id?: string, path = "/1280x1280.jpg") =>
 let currentInfo: MediaInfo | null = null;
 
 export const update = async (info?: UpdateInfo) => {
-  trace.debug("Updating media info:", info);
+  trace.log("Updating media info:", info);
 
   if (!info) return;
 
   if (!currentInfo)
     currentInfo = {
       item: null,
-      position: null,
+      position: 0,
       duration: null,
       albumArt: null,
       artistArt: null,
@@ -67,6 +67,13 @@ export const update = async (info?: UpdateInfo) => {
         ? getMediaURL(track.artist.picture, "/320x320.jpg")
         : null;
     currentInfo.duration = track.duration ? track.duration : null;
+
+    // reset position
+    if(time) {
+      trace.log("SETTING TIME TO", time);
+    }
+    currentInfo.position = time || 0;
+    currentInfo.lastUpdate = Date.now();
   }
 
   if (time) {
@@ -85,9 +92,11 @@ const unloadTransition = intercept(
   "playbackControls/MEDIA_PRODUCT_TRANSITION",
   ([media]) => {
     const mediaProduct = media.mediaProduct as { productId: string };
+    console.log("Setting media item to", mediaProduct.productId);
     MediaItemCache.ensure(mediaProduct.productId)
       .then((track) => {
-        if (track) update({ track, time: 0 });
+        console.log("updating media item");
+        if (track) update({ track, time: 0.0 as number });
       })
       .catch(trace.err.withContext("Failed to fetch media item"));
   },
