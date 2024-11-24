@@ -48,13 +48,19 @@ const createAPIServer = (config: ServerConfig) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         let info = currentMediaInfo;
         info.currentTime = Date.now();
-        const timeSinceLastUpdate = Math.floor(
-          (info.currentTime - info.lastUpdate) / 1000,
-        );
-        if (timeSinceLastUpdate > 1 && !info.paused) {
-          info.position = info.position + timeSinceLastUpdate;
+        if (!info.paused) {
+          info.lastUpdatedPosition = info.position;
+          info.offset = (info.currentTime - info.lastUpdate)/1000;
+          info.position = info.position + info.offset;
+          info.serverCurrentTime = info.currentTime;
+          info.serverLastUpdate = info.lastUpdate;
         }
         res.end(JSON.stringify(currentMediaInfo));
+        // if lastupdatedposition, set back
+        // todo: wack? lol. need to fix
+        if (info.lastUpdatedPosition) {
+          info.position = info.lastUpdatedPosition;
+        }
         return;
       }
 
