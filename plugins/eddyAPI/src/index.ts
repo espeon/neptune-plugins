@@ -58,7 +58,7 @@ export const update = async (info?: UpdateInfo) => {
     };
 
   const { track, time, paused } = info;
-  if (track) {
+  if (track !== undefined) {
     currentInfo.item = track;
     currentInfo.albumArt =
       track.album && track.album.cover ? getMediaURL(track.album.cover) : null;
@@ -67,16 +67,9 @@ export const update = async (info?: UpdateInfo) => {
         ? getMediaURL(track.artist.picture, "/320x320.jpg")
         : null;
     currentInfo.duration = track.duration ? track.duration : null;
-
-    // reset position
-    if(time) {
-      trace.log("SETTING TIME TO", time);
-    }
-    currentInfo.position = time || 0;
-    currentInfo.lastUpdate = Date.now();
   }
 
-  if (time) {
+  if (time !== undefined) {
     currentInfo.position = time;
     currentInfo.lastUpdate = Date.now();
   }
