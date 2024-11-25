@@ -89,7 +89,7 @@ const unloadTransition = intercept(
     MediaItemCache.ensure(mediaProduct.productId)
       .then((track) => {
         console.log("updating media item");
-        if (track) update({ track, time: 0.0 as number });
+        if (track) update({ track, time: 0 });
       })
       .catch(trace.err.withContext("Failed to fetch media item"));
   },
