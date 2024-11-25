@@ -50,7 +50,7 @@ const createAPIServer = (config: ServerConfig) => {
         info.currentTime = Date.now();
         if (!info.paused) {
           info.lastUpdatedPosition = info.position;
-          info.offset = (info.currentTime - info.lastUpdate)/1000;
+          info.offset = (info.currentTime - info.lastUpdate) / 1000;
           info.position = info.position + info.offset;
           info.serverCurrentTime = info.currentTime;
           info.serverLastUpdate = info.lastUpdate;
