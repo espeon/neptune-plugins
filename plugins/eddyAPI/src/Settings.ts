@@ -8,6 +8,7 @@ export const settings = getSettings({
   eddySecureAPI: false,
   eddySecureAPIKey: "super-secret-eddy-key",
   eddyAPIPort: 3665,
+  eddyFrontend: true,
 });
 
 export const Settings = () =>
@@ -31,6 +32,21 @@ export const Settings = () =>
       placeholder="3665"
       title="API port"
     />
+    <${SwitchSetting}
+      checked=${settings.eddyFrontend}
+      onClick=${() => {
+        settings.eddyFrontend = !settings.eddyFrontend;
+        update();
+      }}
+      title="Enable frontend"
+    />
+    <p style="margin-top: 0.25rem; text-size: small;">
+      The frontend is a static React app that is cached in memory on startup and
+      served by the plugin.
+      <br />
+      If you disable the frontend, the plugin will still serve the API, but the
+      UI will not be available.
+    </p>
     <p style="margin-top: 1rem; text-size: small;">
       <strong>Note:</strong> This plugin is still in development. Some settings
       updates may need a plugin reload.

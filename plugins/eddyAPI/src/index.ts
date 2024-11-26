@@ -130,11 +130,16 @@ export const onLoad = (s: typeof settings) => {
         ? "enabled - check your config for the API key."
         : "disabled."),
   );
-  server = startServer({
-    port: s.eddyAPIPort || 3665,
-    secure: s.eddySecureAPI || false,
-    apiKey: s.eddySecureAPIKey,
-  });
+  try {
+    server = startServer({
+      port: s.eddyAPIPort || 3665,
+      secure: s.eddySecureAPI || false,
+      apiKey: s.eddySecureAPIKey,
+    });
+    trace.log("EddyAPI started");
+  } catch (error) {
+    trace.err("Failed to start EddyAPI:", error);
+  }
 };
 
 onLoad(settings);
