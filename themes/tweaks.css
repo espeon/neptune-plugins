@@ -51,6 +51,11 @@ div>[class^=smallHeader]::before {
     }
 }
 
+/* add bottom padding on the main content container */
+[class="for-cypress__react-router--loaded"] {
+    padding-bottom: 6rem;
+}
+
 .bitInfo {
     line-clamp: 2;
     -webkit-line-clamp: 2;
