@@ -14,7 +14,6 @@ let currentMediaInfo: any = {};
 // Update the media info
 export const updateMediaInfo = (mediaInfo: any) => {
   currentMediaInfo = mediaInfo;
-  console.log("Media info updated:", currentMediaInfo);
 };
 
 let frontendCache: Record<string, string> = {};
@@ -27,7 +26,7 @@ const cacheFrontend = (callback: {
   const baseUrl = "eddyviewer.pages.dev";
 
   // Helper function to make HTTPS requests
-  const makeRequest = (path, cb) => {
+  const makeRequest = (path: string, cb: any) => {
     const options = {
       hostname: baseUrl,
       path: path,
@@ -52,7 +51,7 @@ const cacheFrontend = (callback: {
   };
 
   // Fetch index.html
-  makeRequest("/", (error, indexHtmlText) => {
+  makeRequest("/", (error: any, indexHtmlText: string) => {
     if (error) {
       console.error("Error fetching index.html:", error);
       return callback(error);
@@ -85,7 +84,7 @@ const cacheFrontend = (callback: {
     };
 
     // Fetch script
-    makeRequest(scriptUrl, (error, scriptText) => {
+    makeRequest(scriptUrl, (error: any, scriptText: string) => {
       if (error) {
         hasError = true;
         return callback(error);
@@ -95,7 +94,7 @@ const cacheFrontend = (callback: {
     });
 
     // Fetch CSS
-    makeRequest(cssUrl, (error, cssText) => {
+    makeRequest(cssUrl, (error: any, cssText: string) => {
       if (error) {
         hasError = true;
         return callback(error);

@@ -10,6 +10,8 @@ import getPlaybackControl from "@inrixia/lib/getPlaybackControl";
 
 import { updateMediaInfo, stopServer, startServer } from "./serve.native";
 
+import { addCurrentTimeListener } from "./listeners/currentTimeListener";
+
 const trace = Tracer("[EddyAPI]");
 
 interface MediaInfo {
@@ -85,19 +87,26 @@ const unloadTransition = intercept(
   "playbackControls/MEDIA_PRODUCT_TRANSITION",
   ([media]) => {
     const mediaProduct = media.mediaProduct as { productId: string };
-    console.log("Setting media item to", mediaProduct.productId);
     MediaItemCache.ensure(mediaProduct.productId)
       .then((track) => {
-        console.log("updating media item");
-        if (track) update({ track, time: 0 });
+        if (track) update({ track });
       })
       .catch(trace.err.withContext("Failed to fetch media item"));
   },
 );
 
-const unloadTime = intercept("playbackControls/TIME_UPDATE", ([newTime]) => {
-  if (typeof newTime === "number") update({ time: newTime });
-});
+const videoElement = document.querySelector("#video-one");
+const unloadTime = videoElement
+  ? addCurrentTimeListener((time) => {
+      if (time !== undefined) {
+        trace.log(time);
+        update({ time: Number(time) });
+      }
+    })
+  : intercept("playbackControls/PLAY", () => {
+      update({ paused: false });
+    });
+
 const unloadSeek = intercept("playbackControls/SEEK", ([newTime]) => {
   if (typeof newTime === "number") update({ time: newTime });
 });
@@ -146,9 +155,10 @@ onLoad(settings);
 
 export const onUnload = () => {
   unloadTransition();
-  unloadTime();
+  typeof unloadTime === "function" ? unloadTime() : unloadTime.disconnect();
   unloadSeek();
   unloadPlay();
   unloadPause();
+  trace.log("Unloading EddyAPI");
   stopServer();
 };
